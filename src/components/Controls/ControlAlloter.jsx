@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import "./Controls.css";
 
 const Controls = () => {
   const [allRoomData, setAllRoomData] = useState({});
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
-
+  const location = useLocation();
+  const users = location.state?.users || [];
   const [selectedHostel, setSelectedHostel] = useState("");
   const [selectedRoomType, setSelectedRoomType] = useState("");
   const [selectedRoomId, setSelectedRoomId] = useState("");
@@ -21,7 +23,6 @@ const Controls = () => {
   // New state for user IDs
   const [userIds, setUserIds] = useState([""]);
   const [showUserIdInputs, setShowUserIdInputs] = useState(false);
-
 
   useEffect(() => {
     const user = localStorage.getItem('user'); // Assuming 'user' key stores authentication details
@@ -80,36 +81,56 @@ const Controls = () => {
     }
   }, [selectedHostel, selectedRoomType, allRoomData]);
 
-  useEffect(() => {
-    if (selectedRoomId) {
-      setLoading(true);
-      fetchRoomDetails();
-    }
-  }, [selectedRoomId]);
-
   // Reset user IDs whenever peopleToAdd changes
   useEffect(() => {
-    // Initialize array with empty strings based on peopleToAdd
-    setUserIds(Array(parseInt(peopleToAdd) || 0).fill(""));
-    setShowUserIdInputs(false);
-  }, [peopleToAdd]);
+    const count = parseInt(peopleToAdd) || 0;
+    
+    if (users.length > 0 && count <= users.length) {
+      // Use the strings directly since users are already IDs
+      setUserIds(users.slice(0, count));
+    } else {
+      setUserIds(Array(count).fill(""));
+    }
+  }, [peopleToAdd, users]);
 
-  const fetchRoomDetails = () => {
+  const fetchRoomDetails = useCallback(() => {
+    if (!selectedRoomId) return;
+    
     fetch(`http://localhost:5000/allot/${selectedRoomId}`)
       .then(res => res.json())
       .then(roomData => {
         setSelectedRoom(roomData);
         setLoading(false);
-        setPeopleToAdd(1);
+        
+        // Set initial peopleToAdd based on users array if available
+        if (users.length > 0) {
+          const availableSpace = roomData.occupancy - roomData.occupied;
+          const initialPeopleCount = Math.min(users.length, availableSpace);
+          setPeopleToAdd(initialPeopleCount);
+          
+          // Initialize userIds with users data - FIXED
+          setUserIds(users.slice(0, initialPeopleCount));
+        } else {
+          setPeopleToAdd(1);
+          setUserIds([""]);
+        }
+        
         setUpdateMessage("");
-        setUserIds([""]);
         setShowUserIdInputs(false);
       })
       .catch(err => {
         console.error("Error fetching room details:", err);
         setLoading(false);
       });
-  };
+  }, [selectedRoomId, users]);
+
+  // Use the useCallback version in the effect
+  useEffect(() => {
+    if (selectedRoomId) {
+      setLoading(true);
+      fetchRoomDetails();
+    }
+  }, [selectedRoomId, fetchRoomDetails]);
 
   const handleUserIdChange = (index, value) => {
     const newUserIds = [...userIds];
@@ -165,9 +186,11 @@ const Controls = () => {
       .then(response => {
         setUpdating(false);
         if (response.success) {
+          alert("Added successfully")
           setUpdateMessage(`Successfully added ${peopleToAdd} people to the room.`);
           setShowUserIdInputs(false);
           fetchRoomDetails();
+          window.location.href = "/ticketing"
         } else {
           setUpdateMessage(`Error: ${response.error || 'Failed to update room occupancy.'}`);
         }
@@ -331,6 +354,9 @@ const Controls = () => {
             <div className="room-summary">
               <p><strong>Room:</strong> {selectedRoom.id || selectedRoomId}</p>
               <p><strong>Available Spaces:</strong> {selectedRoom.occupancy - selectedRoom.occupied}</p>
+              {users.length > 0 && (
+                <p><strong>Users Available to Add:</strong> {users.length}</p>
+              )}
             </div>
 
             <div className="add-controls">
@@ -340,9 +366,9 @@ const Controls = () => {
                   id="people-count"
                   type="number"
                   min="1"
-                  max={selectedRoom.occupancy - selectedRoom.occupied}
+                  max={Math.min(users.length > 0 ? users.length : Number.MAX_SAFE_INTEGER, selectedRoom.occupancy - selectedRoom.occupied)}
                   value={peopleToAdd}
-                  onChange={(e) => setPeopleToAdd(e.target.value)}
+                  onChange={(e) => setPeopleToAdd(Number(e.target.value))}
                   disabled={updating || selectedRoom.occupied >= selectedRoom.occupancy}
                 />
               </div>

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 const ExcelUpload = () => {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState("");
@@ -8,14 +7,12 @@ const ExcelUpload = () => {
     setFile(e.target.files[0]);
     setStatus("");
   };
-
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) {
       setStatus("Please select an Excel file!");
       return;
     }
-
     const formData = new FormData();
     formData.append("excelFile", file);
 
