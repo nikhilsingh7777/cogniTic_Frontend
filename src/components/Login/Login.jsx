@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './Login.css';
-
+import newRequest from '../utils/utils';
 const Login = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,10 +26,7 @@ const Login = () => {
     setError('');
     
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/verify-phone', {
-        phoneNumber
-      });
-      
+      const response = await newRequest.post("/api/auth/verify-phone", { phoneNumber });
       if (response.data.success) {
         setSuccess(true);
         

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import newRequest from "../utils/utils";
 const ExcelUpload = () => {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState("");
@@ -18,10 +19,11 @@ const ExcelUpload = () => {
 
     try {
       setStatus("Uploading and processing...");
-      const response = await fetch("http://localhost:5000/upload-excel", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await newRequest.post("/upload-excel", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });      
       const result = await response.json();
 
       if (response.ok) {

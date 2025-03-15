@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { roomMapping, bhawanMapping } from '../../data/data';
+import newRequest from '../utils/utils'; // Import axios instance
 
 const Allot = () => {
     const [userId, setUserId] = useState('');
@@ -8,8 +9,7 @@ const Allot = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const user = localStorage.getItem('user'); // Assuming 'user' key stores authentication details
-        
+        const user = localStorage.getItem('user'); // Check if user is logged in
         if (!user) {
             alert('Not logged in');
             window.location.href = '/'; // Redirect to login page
@@ -27,39 +27,36 @@ const Allot = () => {
         setUserDetails(null);
 
         try {
-            const response = await fetch(`http://localhost:5000/allot/user/${userId}`);
-            const data = await response.json();
-    
-            if (response.ok) {
-                let updatedDetails = { ...data };
-    
-                if (data.roomId) {
-                    const splitData = data.roomId.split('_');
-                    console.log('Split Data:', splitData);
-    
-                    if (splitData.length === 3) {
-                        const [hostelCode, roomTypeCode, roomNumber] = splitData;
-    
-                        // Direct lookup from mapping objects
-                        const hostelName = bhawanMapping[hostelCode] || 'Unknown Hostel';
-                        const roomTypeName = roomMapping[roomTypeCode] || 'Unknown Room Type';
-    
-                        updatedDetails = {
-                            ...updatedDetails,
-                            hostel: hostelName,
-                            roomType: roomTypeName,
-                            roomNumber: roomNumber || 'N/A'
-                        };
-                    }
+            // Use axios instead of fetch
+            const response = await newRequest.get(`/allot/user/${userId}`);
+            const data = response.data;
+
+            let updatedDetails = { ...data };
+
+            if (data.roomId) {
+                const splitData = data.roomId.split('_');
+                console.log('Split Data:', splitData);
+
+                if (splitData.length === 3) {
+                    const [hostelCode, roomTypeCode, roomNumber] = splitData;
+
+                    // Direct lookup from mapping objects
+                    const hostelName = bhawanMapping[hostelCode] || 'Unknown Hostel';
+                    const roomTypeName = roomMapping[roomTypeCode] || 'Unknown Room Type';
+
+                    updatedDetails = {
+                        ...updatedDetails,
+                        hostel: hostelName,
+                        roomType: roomTypeName,
+                        roomNumber: roomNumber || 'N/A'
+                    };
                 }
-    
-                setUserDetails(updatedDetails);
-            } else {
-                setError(data.error || 'Failed to fetch user details');
             }
+
+            setUserDetails(updatedDetails);
         } catch (err) {
             console.error('Error fetching user details:', err);
-            setError('An error occurred while fetching user details');
+            setError(err.response?.data?.error || 'An error occurred while fetching user details');
         } finally {
             setLoading(false);
         }

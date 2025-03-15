@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import "./Controls.css";
-
+import newRequest from "../utils/utils";
 const Controls = () => {
   const [allRoomData, setAllRoomData] = useState({});
   const [loading, setLoading] = useState(false);
@@ -15,11 +15,9 @@ const Controls = () => {
   const [hostels, setHostels] = useState([]);
   const [roomTypes, setRoomTypes] = useState([]);
   const [roomIds, setRoomIds] = useState([]);
-
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [peopleToAdd, setPeopleToAdd] = useState(1);
   const [updateMessage, setUpdateMessage] = useState("");
-
   // New state for user IDs
   const [userIds, setUserIds] = useState([""]);
   const [showUserIdInputs, setShowUserIdInputs] = useState(false);
@@ -35,7 +33,7 @@ const Controls = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:5000/allot/room_details")
+    newRequest.get("/allot/room_details")
       .then((res) => res.json())
       .then((data) => {
         setAllRoomData(data);
@@ -95,8 +93,7 @@ const Controls = () => {
 
   const fetchRoomDetails = useCallback(() => {
     if (!selectedRoomId) return;
-    
-    fetch(`http://localhost:5000/allot/${selectedRoomId}`)
+    newRequest.get(`/allot/${selectedRoomId}`)
       .then(res => res.json())
       .then(roomData => {
         setSelectedRoom(roomData);
@@ -171,8 +168,7 @@ const Controls = () => {
 
     const updatedOccupied = selectedRoom.occupied + parseInt(peopleToAdd);
 
-    fetch(`http://localhost:5000/allot/update-room`, {
-      method: 'POST',
+    newRequest.post('/allot/update-room', {
       headers: {
         'Content-Type': 'application/json',
       },

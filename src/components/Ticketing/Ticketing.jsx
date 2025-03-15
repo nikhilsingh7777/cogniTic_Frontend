@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useNavigate } from 'react-router-dom';
-
+import newRequest from '../utils/utils';
 const Ticket = () => {
     const [numberOfPeople, setNumberOfPeople] = useState("");
     const [isConfigured, setIsConfigured] = useState(false);
@@ -149,9 +149,7 @@ const Ticket = () => {
             );
         }, 100);
     };
-    
-    // Clean up scanner when component unmounts
-    useEffect(() => {
+        useEffect(() => {
         return () => {
             if (scannerRef.current) {
                 scannerRef.current.clear()
@@ -167,11 +165,9 @@ const Ticket = () => {
             // Show a loading status while verification is happening
             setVerificationStatus("⏳ Verifying...");
             
-            const response = await fetch("http://localhost:5000/api/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ uniqueId: qrData }),
-            });
+            const response = await newRequest.post("/api/verify", {
+                uniqueId: qrData,
+            });            
             const data = await response.json();
             setVerificationStatus(data.success ? 
                 `✅ Entry Verified! (${scanCount}/${numberOfPeople})` : 
