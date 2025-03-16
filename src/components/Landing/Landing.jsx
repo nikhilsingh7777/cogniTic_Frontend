@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Landing = () => {
     useEffect(() => {
-        const user = localStorage.getItem('user'); // Assuming 'user' key stores authentication details
+        const user = localStorage.getItem('user'); // Checking user authentication
         if (!user) {
             alert('Not logged in');
             window.location.href = '/'; // Redirect to login page
@@ -13,19 +13,18 @@ const Landing = () => {
     return (
         <div style={styles.container}>
             <h1 style={styles.heading}>COGNIZANCE'25 ACCO. & SCAN PORTAL</h1>
-            <nav style={styles.navbar}>
-                <ul style={styles.navList}>
-                    <li style={styles.navItem}><Link to="/ticketing" style={styles.navLink}>SCAN Portal</Link></li>
-                    <li style={styles.navItem}><Link to="/alloter" style={styles.navLink}>Alloter</Link></li>
-                    <li style={styles.navItem}><Link to="/controls" style={styles.navLink}>Controls</Link></li>
-                    <li style={styles.navItem}><Link to="/excel-upload" style={styles.navLink}>Mailer</Link></li>
-                </ul>
-            </nav>
+
+            <div style={styles.buttonContainer}>
+                <Link to="/ticketing" style={{ ...styles.button, ...styles.scanButton }}>SCAN Portal</Link>
+                <Link to="/alloter" style={styles.button}>Alloter</Link>
+                <Link to="/controls" style={styles.button}>Controls</Link>
+                <Link to="/excel-upload" style={styles.button}>Mailer</Link>
+            </div>
         </div>
     );
 };
 
-// Inline CSS styles (CSS-in-JS approach)
+// Inline CSS styles
 const styles = {
     container: {
         textAlign: 'center',
@@ -41,51 +40,45 @@ const styles = {
         fontSize: '28px',
         fontWeight: 'bold',
         color: '#2c3e50',
-        marginBottom: '20px',
+        marginBottom: '30px',
     },
-    navbar: {
-        backgroundColor: '#34495e',
-        padding: '15px 0',
-        width: '100%',
-        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
-    },
-    navList: {
-        listStyle: 'none',
+    buttonContainer: {
         display: 'flex',
-        justifyContent: 'center',
-        padding: 0,
-        margin: 0,
+        flexDirection: 'column', // Arrange buttons vertically
+        alignItems: 'center',
+        gap: '15px', // Space between buttons
     },
-    navItem: {
-        margin: '0 15px',
-    },
-    navLink: {
+    button: {
         textDecoration: 'none',
-        color: 'white',
+        color: '#fff',
         fontSize: '18px',
         fontWeight: 'bold',
-        padding: '10px 15px',
-        borderRadius: '5px',
-        transition: '0.3s',
-        backgroundColor: '#2c3e50',
+        padding: '12px 20px',
+        borderRadius: '8px',
+        backgroundColor: '#9bc7f2', // New button color
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)',
+        transition: '0.3s ease-in-out',
+        width: '220px',
+        textAlign: 'center',
     },
-    navLinkHover: {
-        backgroundColor: '#1abc9c',
+    scanButton: {
+        backgroundColor: '#2c3e50', // Different color for the SCAN button
     },
 };
 
-// Add hover effect
+// Add hover effects dynamically
 document.addEventListener("DOMContentLoaded", function () {
-    const links = document.querySelectorAll("nav a");
-    links.forEach(link => {
-        link.addEventListener("mouseenter", () => {
-            link.style.backgroundColor = styles.navLinkHover.backgroundColor;
+    const buttons = document.querySelectorAll("a");
+    buttons.forEach(button => {
+        button.addEventListener("mouseenter", () => {
+            button.style.backgroundColor = "#1a73e8"; // Darker blue on hover
+            button.style.transform = "scale(1.05)"; // Slight zoom-in effect
         });
-        link.addEventListener("mouseleave", () => {
-            link.style.backgroundColor = styles.navLink.backgroundColor;
+        button.addEventListener("mouseleave", () => {
+            button.style.backgroundColor = styles.button.backgroundColor; // Restore original color
+            button.style.transform = "scale(1)";
         });
     });
 });
 
 export default Landing;
-
