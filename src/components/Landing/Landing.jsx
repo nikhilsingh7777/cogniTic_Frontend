@@ -18,9 +18,9 @@ const Landing = () => {
             <nav>
                 <ul>
                     <li><Link to="/ticketing">SCAN Portal</Link></li>
+                      <li><Link to="/alloter">Alloter</Link></li>
                      <li><Link to="/controls">Controls</Link></li>
-                    <li><Link to="/alloter">Alloter</Link></li>
-                    <li><Link to="/excel-upload">Mailer</Link></li> {/* Added */}
+                    <li><Link to="/excel-upload">Mailer</Link></li>
                 </ul>
             </nav>
         </>
